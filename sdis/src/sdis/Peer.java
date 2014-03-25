@@ -8,12 +8,12 @@ import java.security.NoSuchAlgorithmException;
 public class Peer {
 	private SubscribeChannel MC,MDB,MDR;
 	
-	public Peer(String strMC, String strMDB, String strMDR) throws NoSuchAlgorithmException, IOException{
+	public Peer(String MCaddr, String MCport,String MDBaddr, String MDBport, String MDRaddr, String MDRport) throws NoSuchAlgorithmException, IOException{
 
-		MC = new SubscribeChannel(strMC);
-		MDB = new SubscribeChannel(strMDB);
-		MDR= new SubscribeChannel(strMDR);
-		Backup b = new Backup();	
+		MC = new SubscribeChannel(MCaddr,MCport);
+		MDB = new SubscribeChannel(MDBaddr,MDBport);
+		MDR= new SubscribeChannel(MDRaddr,MDRport);
+		Backup b = new Backup(MDB);	
 	}
 
 	
