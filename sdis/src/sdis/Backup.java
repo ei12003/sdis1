@@ -16,22 +16,30 @@ public class Backup {
 	
 	public Backup(SubscribeChannel MDB) throws NoSuchAlgorithmException, IOException{
 		this.MDB=MDB;
-		split(new File("file.jpg"));
+		split(new File("file.jpg"),1);
 	}
 	
 	
-	public void split(File file) throws NoSuchAlgorithmException, IOException{
+	public void split(File file, int replicationDeg) throws NoSuchAlgorithmException, IOException{
 		
 		int bytesRead;
 		String bitString = file.getName()+file.lastModified();
 		String fileID = SHA256.apply(bitString);
 		BufferedInputStream fileBuffer = new BufferedInputStream(new FileInputStream(file));
 		byte[] buffer = new byte[chuckSize];
+		Chunk chunk = new Chunk(fileID,0,replicationDeg,null);
 		
 		while((bytesRead=fileBuffer.read(buffer))>0){
-			
+			sendChunk(chunk,buffer);
+			chunk.chunkNo++;
 		}
-		putChunk("oi",2,2,"oi".getBytes());
+		//putChunk("oi",2,2,"oi".getBytes());
+	}
+	
+	public void sendChunk(Chunk chunk, byte[] data){
+		
+		
+		
 	}
 	
 	public void putChunk(String fileId, int chunkNo, int replicationDeg, byte[] data) throws IOException{
