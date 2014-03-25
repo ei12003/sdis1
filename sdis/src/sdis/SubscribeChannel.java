@@ -5,8 +5,6 @@ import java.io.Console;
 import java.io.IOException;
 import java.net.*;
 
-
-
 public class SubscribeChannel {
 	private static MulticastSocket multiSocket;
 	private static DatagramSocket socket;
@@ -14,8 +12,8 @@ public class SubscribeChannel {
 	private static DatagramPacket sendPacket;
 	private static DatagramPacket receivePacket;
 	private static DatagramPacket multicastPacket;
-	private static String sendData;
 	private static byte receiveData[];
+	private static byte sendData[];
     
 	public SubscribeChannel(String strChannel, String strAdress) throws IOException {
 		int port= Integer.parseInt(strChannel);
@@ -24,8 +22,10 @@ public class SubscribeChannel {
 			multiSocket = new MulticastSocket(port);
 			group = InetAddress.getByName(strAdress);
 			multiSocket.joinGroup(group);
-			receiveData = new byte[256];
+			sendData = new byte[65000];
+			receiveData = new byte[65000];
 			multicastPacket = new DatagramPacket(receiveData, receiveData.length);
+			multicastPacket = new DatagramPacket(sendData, sendData.length);
 			multiSocket.receive(multicastPacket);
 			multiSocket.leaveGroup(group);
 			while(true) {
@@ -37,28 +37,20 @@ public class SubscribeChannel {
 		}
 	}
 	
-	private static String userInput() {
-		Console console = System.console();
-		String input = console.readLine("Enter input:");
-		return input;
-	}
+	
     
 	
 	private static void clientRequest() throws Exception {
-		sendData = userInput();
-		String address = new String(multicastPacket.getData());
-		sendPacket = new DatagramPacket(sendData.getBytes(),sendData.length(),InetAddress.getByName(address),multicastPacket.getPort());
-		socket.send(sendPacket);
+		int ttl = 1;
+		sendData = new byte[65000];
+		sendPacket = new DatagramPacket(sendData, sendData.length);
+		multiSocket.send(sendPacket,(byte)ttl);
 	}
 	
 	private static void serverResponse() throws Exception {
-		receiveData = new byte[256];
+		receiveData = new byte[65000];
 		receivePacket = new DatagramPacket(receiveData, receiveData.length);
 		socket.receive(receivePacket);
-        
-		System.out.print("\nResponse: ");
-		System.out.println(new String(receivePacket.getData()));
-		System.out.println("\n");
 	}
     
 }
