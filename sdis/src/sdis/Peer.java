@@ -6,16 +6,17 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 public class Peer {
-	private SubscribeChannel MC,MDB,MDR;
+	private static SubscribeChannel MC,MDB,MDR;
+	static Thread threadMC;
+	
 	
 	public Peer(String MCaddr, String MCport,String MDBaddr, String MDBport, String MDRaddr, String MDRport) throws NoSuchAlgorithmException, IOException{
 
 		MC = new SubscribeChannel(MCaddr,MCport);
 		MDB = new SubscribeChannel(MDBaddr,MDBport);
 		MDR= new SubscribeChannel(MDRaddr,MDRport);
-		Backup b = new Backup(MDB);	
+		Backup b = new Backup(MDB);	 
+		threadMC= new Thread(MC);
+		threadMC.start();
 	}
-
-	
-	
 }

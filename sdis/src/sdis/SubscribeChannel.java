@@ -5,57 +5,65 @@ import java.io.Console;
 import java.io.IOException;
 import java.net.*;
 
-public class SubscribeChannel {
+public class SubscribeChannel implements Runnable {
 	private static MulticastSocket multiSocket;
 	private static DatagramPacket receivePacket;
+	private static DatagramPacket sendPacket;
 	private static byte receiveData[];
+	private static String strChannel1;
+	private static String strAdress1;
     
 	public SubscribeChannel(String strChannel, String strAdress) throws IOException {
-		receive(strChannel,strAdress);
-	}
-	private static void receive(String strChannel, String strAdress)throws IOException{
+		strChannel1=strChannel;
+		strAdress1=strAdress;
 		int port= Integer.parseInt(strChannel);
 		// Create the socket and bind it to port 'port'.
 		multiSocket = new MulticastSocket(port);
 
 		// join the multicast group
 		multiSocket.joinGroup(InetAddress.getByName(strAdress));
-		// Now the socket is set up and we are ready to receive packets
-
-		// Create a DatagramPacket and do a receive
+	}
+	public static String[] receive()throws IOException{
+		
 		receiveData = new byte[65000];
 		receivePacket = new DatagramPacket(receiveData, receiveData.length);
 		multiSocket.receive(receivePacket);
 
-		// Finally, let us do something useful with the data we just received,
-		// like print it on stdout :-)
 		System.out.println("Received data from: " + receivePacket.getAddress().toString() +
 				    ":" + receivePacket.getPort() + " with length: " +
 				    receivePacket.getLength());
 		System.out.write(receivePacket.getData(),0,receivePacket.getLength());
 		System.out.println();
 
-		// And when we have finished receiving data leave the multicast group and
-		// close the socket
-		multiSocket.leaveGroup(InetAddress.getByName(strAdress));
+		multiSocket.leaveGroup(InetAddress.getByName(strAdress1));
 		multiSocket.close();
-
-
+		String[] r= {receivePacket.getAddress().toString(), receivePacket.getData().toString()};
+		return r;
 	}
-	private static void send(String strChannel, String strAdress, byte buf[])throws IOException{
-		int port= Integer.parseInt(strChannel);
-		// Which ttl
+	public static void send(byte buf[])throws IOException{
+		int port= Integer.parseInt(strChannel1);
 		int ttl = 1;
 
-		// Create the socket but we don't bind it as we are only going to send data
-		MulticastSocket s = new MulticastSocket();
-		// Create a DatagramPacket 
-		DatagramPacket pack = new DatagramPacket(buf, buf.length,
-							 InetAddress.getByName(strAdress), port);
-		// Do a send. Note that send takes a byte for the ttl and not an int.
-		s.send(pack,(byte)ttl);
+		multiSocket = new MulticastSocket();
+		sendPacket = new DatagramPacket(buf, buf.length,
+							 InetAddress.getByName(strAdress1), port);
+		multiSocket.send(sendPacket,(byte)ttl);
 
-		// And when we have finished sending data close the socket
-		s.close();
+		multiSocket.close();
+	}
+	@Override
+	public void run() {
+		String ip;
+		String mess;
+		String[] receive= new String[2];
+		try {
+			receive=this.receive();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ip=receive[0];
+		mess=receive[1];
+		if()
 	}
 }
