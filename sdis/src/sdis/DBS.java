@@ -14,11 +14,12 @@ public static void main(String[] args) throws NoSuchAlgorithmException, IOExcept
 			System.out.println("MC: Control Channel | MDB: Backup Channel | MDR: Restore Channel\n");
 			return;
 		}*/
-		
-		Peer peer = new Peer(args[0],args[1],  // MC
+	
+		/*Peer peer = new Peer(args[0],args[1],  // MC
 							 args[2],args[3],  // MDB
 							 args[4],args[5]); // MDR
-		
+		*/
+	Peer peer = new Peer("225.4.5.6","5340","225.4.5.6","5340","225.4.5.6","5340");
 		
 }
 }

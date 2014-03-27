@@ -28,7 +28,6 @@ public class Backup {
 	
 	
 	public void split(File file, int replicationDeg) throws NoSuchAlgorithmException, IOException{
-		
 		int bytesRead,chunkNo=0;
 		String bitString = file.getName()+file.lastModified();
 		String fileID = SHA256.apply(bitString);
@@ -42,7 +41,6 @@ public class Backup {
 			allChunks.add(chunk);
 			chunkNo++;
 		}
-		//putChunk("oi",2,2,"oi".getBytes());
 	}
 	
 	public void sendChunk(Chunk chunk, byte[] data) throws IOException{
@@ -69,13 +67,11 @@ public class Backup {
 	
 	public void putChunk(String fileId, int chunkNo, int replicationDeg, byte[] data) throws IOException{
 		String header= "PUTCHUNK"+"1.0"+fileId+chunkNo+replicationDeg+Message.CRLF+Message.CRLF;
-		
+		System.out.println("\n"+header+" <data>");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 		outputStream.write( header.getBytes() );
 		if(data != null)
-			outputStream.write( data );	
-		
-		//SEND ..................................................                                                                                                                                            .toByteArray()
-		
+			outputStream.write( data );		
+		MDB.send(outputStream.toByteArray());
 	}
 }

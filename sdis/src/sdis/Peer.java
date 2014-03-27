@@ -15,8 +15,16 @@ public class Peer {
 		MC = new SubscribeChannel(MCaddr,MCport);
 		MDB = new SubscribeChannel(MDBaddr,MDBport);
 		MDR= new SubscribeChannel(MDRaddr,MDRport);
-		Backup b = new Backup(MDB);	 
-		threadMC= new Thread(MC);
-		threadMC.start();
+		
+		Backup backup = new Backup(MDB);
+		
+		MC.setBackup(backup);
+		MDB.setBackup(backup);
+		MDR.setBackup(backup);
+		
+		//threadMC= new Thread(MC);
+		//threadMC.start();
+			 
+		
 	}
 }
