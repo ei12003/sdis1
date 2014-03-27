@@ -64,6 +64,19 @@ public class SubscribeChannel implements Runnable {
 		}
 		ip=receive[0];
 		mess=receive[1];
-		if()
+		String[] parts = mess.split(" ");
+		String part1 = parts[0];
+		if(part1=="STORED"){
+            
+		}
+		if(part1=="GETCHUNK"){
+            
+		}
+		if(part1=="DELETE"){
+            
+		}
+		if(part1=="REMOVED"){
+            
+		}
 	}
 }
