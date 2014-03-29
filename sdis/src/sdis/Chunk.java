@@ -1,5 +1,7 @@
 package sdis;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,6 +19,12 @@ public class Chunk {
 		this.replicationDeg=replicationDeg;
 
 		storedPeers = new ArrayList<String>();
+		try {
+			storedPeers.add(InetAddress.getLocalHost().getHostAddress().toString());
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public synchronized void addStoredPeer(String peer){
@@ -36,6 +44,12 @@ public class Chunk {
 			return true;
 		else
 			return false;
+	}
+	public synchronized boolean exceedsReplication(){
+		if(this.getNumberStored()>replicationDeg)
+			return true;
+		else
+			return false;		
 	}
 
 	public void setData(String body) {

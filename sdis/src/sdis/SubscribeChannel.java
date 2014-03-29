@@ -32,13 +32,13 @@ public class SubscribeChannel implements Runnable {
 		receiveData = new byte[65000];
 		receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
-		// do {
+		 do {
 
 		multiSocket.receive(receivePacket);
 
 		// System.out.println(InetAddress.getLocalHost().getHostAddress().toString()+receivePacket.getAddress().toString());
-		// } while (InetAddress.getLocalHost().getHostAddress().toString()
-		// .equals(receivePacket.getAddress().toString().split("/")[1]));
+		 } while (InetAddress.getLocalHost().getHostAddress().toString()
+		 .equals(receivePacket.getAddress().toString().split("/")[1]));
 
 		// System.out.write(receivePacket.getData(), 0,
 		// receivePacket.getLength());
@@ -94,7 +94,8 @@ public class SubscribeChannel implements Runnable {
 					if (messageType.equals("STORED")) {
 						System.out.println("RECEIVED STORE" + strAdress);
 						backup.updateChunkPeers(msg,peer);
-						backup.currentChunk.addStoredPeer(peer);
+						if(backup.currentChunk!=null)
+							backup.currentChunk.addStoredPeer(peer);
 					}
 					if (messageType.equals("GETCHUNK")) {
 

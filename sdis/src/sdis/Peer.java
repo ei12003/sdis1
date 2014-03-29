@@ -37,7 +37,8 @@ System.out.println(MCaddr+"|"+MDBaddr);
 			}
 			System.out.println("oi");
 		}*/
-		backup.split(new File("file.jpg"),1);
+		if(!backup.split(new File("file.jpg"),1))
+			System.out.println("FAILED");
 		//MDB.setBackup(backup);
 		//MDR.setBackup(backup);
 		
