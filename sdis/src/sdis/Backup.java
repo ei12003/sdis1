@@ -133,11 +133,12 @@ public class Backup {
 	public void putChunk(String fileId, int chunkNo, int replicationDeg,
 			byte[] data) throws IOException {
 		String header = "PUTCHUNK" + " 1.0 " + fileId + " " + chunkNo + " "
-				+ replicationDeg + " " + Message.CRLF + Message.CRLF;
+				+ replicationDeg + Message.CRLF + Message.CRLF;
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header.getBytes());
-		if (data != null)
-			outputStream.write(data);
+		/*if (data != null)
+			outputStream.write(data);*/
+		outputStream.write("HEY".getBytes());
 
 		MDB.send(outputStream.toByteArray());
 		System.out.println("PUTCHUNK " + fileId + "\n");

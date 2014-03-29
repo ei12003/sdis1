@@ -16,17 +16,19 @@ public class Peer {
 		MC = new SubscribeChannel(MCaddr,MCport);
 		MDB = new SubscribeChannel(MDBaddr,MDBport);
 		//MDR= new SubscribeChannel(MDRaddr,MDRport);
-System.out.println(MCaddr+"|"+MDBaddr);
+		System.out.println(MCaddr+"|"+MDBaddr+"|"+MDRaddr);
 		threadMC= new Thread(MC);
 		threadMDB= new Thread(MDB);
 		//threadMDR= new Thread(MDR);
 		
 		Backup backup = new Backup(MDB,MC);
+		//Restore restore = new Restore(MDR,MC,backup);
 		MC.setBackup(backup);
 		MDB.setBackup(backup);
 		
 		threadMC.start();
 		threadMDB.start();
+		//threadMDR.start();
 		
 		/*while(true){
 			try {
@@ -37,8 +39,8 @@ System.out.println(MCaddr+"|"+MDBaddr);
 			}
 			System.out.println("oi");
 		}*/
-		if(!backup.split(new File("file.jpg"),1))
-			System.out.println("FAILED");
+		//if(!backup.split(new File("file.jpg"),1))
+		//	System.out.println("FAILED");
 		//MDB.setBackup(backup);
 		//MDR.setBackup(backup);
 		

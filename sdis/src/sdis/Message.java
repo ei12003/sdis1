@@ -14,17 +14,21 @@ public class Message {
 
 	public Message(String message) {
 		String msg = new String(message);
-		String[] temp = msg.split(" ",7);
+		String[] temp = msg.split(" ",6);
 		messageType = temp[0];
 
 		if (messageType.equals("DELETE")) {
 			fileId = temp[1];
 		} else {
-			if (messageType.equals("PUTCHUNK"))
-				replicationDeg = Integer.parseInt(temp[4]);
+			if (messageType.equals("PUTCHUNK")){
+				replicationDeg = Integer.parseInt(temp[4].split(CRLF+CRLF)[0]);
+				chunkNo = Integer.parseInt(temp[3]);
+			}
+			else
+				chunkNo = Integer.parseInt(temp[3].split(CRLF+CRLF)[0]);
 			version = temp[1];
 			fileId = temp[2];
-			chunkNo = Integer.parseInt(temp[3]);
+
 			if (messageType.equals("PUTCHUNK") || messageType.equals("CHUNK")){
 				body=msg.split(CRLF+CRLF,2)[1];
 				//System.out.println(body.length()+"$$$$$$$$$$$\n"+body+"\n$$$$$$$$$$");
