@@ -1,5 +1,7 @@
 package sdis;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -7,12 +9,15 @@ import java.util.Scanner;
 
 public class Menu {
 	private static SplitMessage m;
-	public void menu(String args[]){
+	public Menu(){
+		
+	}
+	public void menu(String args[]) throws NoSuchAlgorithmException, IOException{
 		if(args.length==7){
-			//Peer peer = new Peer(args[0],args[1],args[2],args[3],args[4],args[5],args[6]);
+			Peer peer = new Peer(args[0],args[1],args[2],args[3],args[4],args[5]);
 		}
 		else{
-			//Peer peer = new Peer("225.4.5.6","5340","225.4.5.7","5341","225.4.5.8","5342","");
+			Peer peer = new Peer("225.4.5.6","5340","225.4.5.7","5341","225.4.5.8","5342");
 		}
 		
 		m=new SplitMessage();
@@ -22,15 +27,15 @@ public class Menu {
 				DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date dateMC = new Date();
 				System.out.print(dateFormatMC.format(dateMC));
-				System.out.println(" => MC: Init at " /*+ args[0]*/);
+				System.out.println(" => MC: Init at " + args[0]);
 				DateFormat dateFormatMDB = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date dateMDB = new Date();
 				System.out.print(dateFormatMDB.format(dateMDB));
-				System.out.println(" => MDB: Init at " /*+ args[2]*/);
+				System.out.println(" => MDB: Init at " + args[2]);
 				DateFormat dateFormatMDR = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date dateMDR = new Date();
 				System.out.print(dateFormatMDR.format(dateMDR));
-				System.out.println(" => MDR: Init at " /*+ args[4]*/);
+				System.out.println(" => MDR: Init at " + args[4]);
 			}
 			else{
 				DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -74,17 +79,17 @@ public class Menu {
 			else if(splits[0].equals("BACKUP")/*bool*/){
 
 			}
-			else if(splits[1].equals("RESTORE")){
+			else if(splits[0].equals("RESTORE")){
 
 			}
-			else if(splits[1].equals("DELETE")){
+			else if(splits[0].equals("DELETE")){
 
 			}
-			else if(splits[1].equals("REMOVE")){
+			else if(splits[0].equals("REMOVE")){
 
 			}
 			else if(input.equals("q")||input.equals("Q")){
-
+				System.exit(0);
 			}
 			else {
 				System.out.println("Wrong command. Enter h for help.");
