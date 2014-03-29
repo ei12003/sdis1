@@ -19,7 +19,9 @@ public static void main(String[] args) throws NoSuchAlgorithmException, IOExcept
 							 args[2],args[3],  // MDB
 							 args[4],args[5]); // MDR
 		*/
-	Peer peer = new Peer("225.4.5.6","5340","225.4.5.6","5340","225.4.5.6","5340");
-		
+	Peer peer = new Peer("225.4.5.6","5340","225.4.5.7","5341","225.4.5.8","5342");
+		//String oi="PUTCHUNK <Version> <FileId> <ChunkNo> <ReplicationDeg> "+Message.CRLF+Message.CRLF+"<Body> asdasd asdasd";
+		//String oi2="PUTCHUNK <Version> <FileId>";
+		//System.out.println(oi.split(Message.CRLF+Message.CRLF)[1]);
 }
 }

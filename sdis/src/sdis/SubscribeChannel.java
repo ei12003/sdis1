@@ -4,107 +4,124 @@ package sdis;
 import java.io.Console;
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 
 public class SubscribeChannel implements Runnable {
-	private static MulticastSocket multiSocket;
-	private static DatagramPacket receivePacket;
-	private static DatagramPacket sendPacket;
-	private static byte receiveData[];
-	private static String strAdress;
-    private static int port;
+	private MulticastSocket multiSocket;
+	private DatagramPacket receivePacket;
+	private DatagramPacket sendPacket;
+	private byte receiveData[];
+	private String strAdress;
+	private int port;
 	private Backup backup;
-	
-	public SubscribeChannel(String strAdress, String strPort) throws IOException {
-		
-		this.port= Integer.parseInt(strPort);
-		this.strAdress=strAdress;
+
+	public SubscribeChannel(String strAdress, String strPort)
+			throws IOException {
+
+		this.port = Integer.parseInt(strPort);
+		this.strAdress = strAdress;
 		// Create the socket and bind it to port 'port'.
 		multiSocket = new MulticastSocket(port);
 
 		// join the multicast group
 		multiSocket.joinGroup(InetAddress.getByName(strAdress));
 	}
-	public static String[] receive()throws IOException{
-		
+
+	public String[] receive() throws IOException {
+		byte[] newPacket;
 		receiveData = new byte[65000];
 		receivePacket = new DatagramPacket(receiveData, receiveData.length);
-		
-		do{
-		multiSocket.receive(receivePacket);
-		}while(InetAddress.getLocalHost().getHostAddress().toString().equals(receivePacket.getAddress().toString().split("/")[1]));
-		
-		System.out.println("Received data from: " + receivePacket.getAddress().toString() +
-				    ":" + receivePacket.getPort() + " with length: " +
-				    receivePacket.getLength());
-		System.out.write(receivePacket.getData(),0,receivePacket.getLength());
-		System.out.println();
 
-		multiSocket.leaveGroup(InetAddress.getByName(strAdress));
-		multiSocket.close();
-		String[] r= {receivePacket.getAddress().toString(), receivePacket.getData().toString()};
+		// do {
+
+		multiSocket.receive(receivePacket);
+
+		// System.out.println(InetAddress.getLocalHost().getHostAddress().toString()+receivePacket.getAddress().toString());
+		// } while (InetAddress.getLocalHost().getHostAddress().toString()
+		// .equals(receivePacket.getAddress().toString().split("/")[1]));
+
+		// System.out.write(receivePacket.getData(), 0,
+		// receivePacket.getLength());
+		// System.out.println();
+
+		// multiSocket.leaveGroup(InetAddress.getByName(strAdress));
+		// multiSocket.close();
+
+		newPacket = Arrays.copyOfRange(receivePacket.getData(), 0,
+				receivePacket.getLength());
+
+		String[] r = { receivePacket.getAddress().toString().split("/")[1],
+				new String(newPacket) };
 		return r;
-		
+
 	}
-	public static void send(byte buf[])throws IOException{
-		
+
+	public void send(byte buf[]) throws IOException {
+
 		int ttl = 1;
 
-		multiSocket = new MulticastSocket();
+		// multiSocket = new MulticastSocket();
 		sendPacket = new DatagramPacket(buf, buf.length,
-							 InetAddress.getByName(strAdress), port);
-		multiSocket.send(sendPacket,(byte)ttl);
+				InetAddress.getByName(strAdress), port);
+		multiSocket.send(sendPacket, (byte) ttl);
 
-		multiSocket.close();
 	}
+
 	@Override
 	public void run() {
-		String ip;
-		String mess;
-		String[] receive= new String[2];
-		try {
-			System.out.println("receiving");
-			receive=this.receive();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		String[] tmp = new String[2];
+
+		while (true) {
+			try {
+				tmp = this.receive();
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			final String[] received = tmp;
+			Thread t = new Thread(new Runnable() {
+
+				public void run() {
+					String peer, message, messageType;
+					Message msg;
+
+					peer = received[0];
+					msg = new Message(received[1]);
+					messageType = msg.getMessageType();
+
+					if (messageType.equals("STORED")) {
+						System.out.println("RECEIVED STORE" + strAdress);
+						backup.updateChunkPeers(msg,peer);
+						backup.currentChunk.addStoredPeer(peer);
+					}
+					if (messageType.equals("GETCHUNK")) {
+
+					}
+					if (messageType.equals("DELETE")) {
+
+					}
+					if (messageType.equals("REMOVED")) {
+
+					}
+					if (messageType.equals("PUTCHUNK")) {
+						System.out.println("Received PUTCHUNK from "
+								+ strAdress);
+						backup.saveChunk(msg);
+						
+
+					}
+				}
+			});
+
+			t.start();
+
 		}
-		System.out.println("received:"+receive[1]);
-		ip=receive[0];
-		mess=receive[1];
-<<<<<<< HEAD
-		String[] parts = mess.split(" ");
-		String part1 = parts[0];
-		if(part1=="STORED"){
-            
-		}
-		if(part1=="GETCHUNK"){
-            
-		}
-		if(part1=="DELETE"){
-            
-		}
-		if(part1=="REMOVED"){
-            
-		}
-=======
-			String[] parts = mess.split(" ");
-String part1 = parts[0];
-if(part1=="STORED"){
-            
-}
-if(part1=="GETCHUNK"){
-            
-}
-if(part1=="DELETE"){
-            
-}
-if(part1=="REMOVED"){
-            
-}
 	}
+
 	public void setBackup(Backup backup) {
-		this.backup=backup;
-		
->>>>>>> FETCH_HEAD
+		this.backup = backup;
+
 	}
 }

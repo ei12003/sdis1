@@ -7,7 +7,9 @@ public class Chunk {
 	public String fileId;
 	public int chunkNo;
 	public int replicationDeg;
+	public String data;
 	private ArrayList<String> storedPeers;
+	private int chunkSize;
 
 	public Chunk(String fileId, int chunkNo, int replicationDeg){
 		this.fileId=fileId;
@@ -34,5 +36,13 @@ public class Chunk {
 			return true;
 		else
 			return false;
+	}
+
+	public void setData(String body) {
+		this.data=body;
+		chunkSize=data.length();
+	}
+	public synchronized int getSize(){
+		return chunkSize;
 	}
 }
