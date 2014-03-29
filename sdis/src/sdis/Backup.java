@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -16,17 +17,22 @@ public class Backup {
 	public static final int INIT_BACKUP_TIMEOUT = 500;
 	public static final int MAX_TRIES = 5;
 	ArrayList<Chunk> allBackedChunks, allStoredChunks;
-	SubscribeChannel MDB, MC;
+	ConcurrentHashMap<String,String> backedFiles;
+	ConcurrentHashMap<String,Integer> totalChunks;
+	SubscribeChannel MDB, MC, MDR;
 	public Chunk currentChunk;
 	public static final int chuckSize = 64000;
 	public String teststr;
 
-	public Backup(SubscribeChannel MDB, SubscribeChannel MC)
+	public Backup(SubscribeChannel MDB, SubscribeChannel MC, SubscribeChannel MDR)
 			throws NoSuchAlgorithmException, IOException {
 		allBackedChunks = new ArrayList<Chunk>();
 		allStoredChunks = new ArrayList<Chunk>();
+		backedFiles = new ConcurrentHashMap<String,String>();
+		totalChunks = new ConcurrentHashMap<String,Integer>();
 		this.MDB = MDB;
 		this.MC = MC;
+		this.MDR = MDR;
 	}
 
 	public synchronized void saveChunk(Message msg) {
@@ -34,7 +40,7 @@ public class Backup {
 		if (msg.getChunkNo() == 10)
 			System.out.println("sup");
 		for (int i = 0; i < allStoredChunks.size(); i++) {
-			// System.out.println("!"+allStoredChunks.size()+"!"+allStoredChunks.get(i).chunkNo+"||"+msg.getChunkNo());
+			 System.out.println("!!!!!!"+allStoredChunks.size()+"!"+allStoredChunks.get(i).chunkNo+"||"+msg.getChunkNo());
 			if (msg.getFileId().equals(allStoredChunks.get(i).fileId)
 					&& (msg.getChunkNo() == allStoredChunks.get(i).chunkNo)) {
 				allStoredChunks.get(i).resetStoredPeers();
@@ -43,15 +49,17 @@ public class Backup {
 			}
 		}
 		if (go) {
+			System.out.println("????????");
 			Chunk newChunk = new Chunk(msg.getFileId(), msg.getChunkNo(),
 					msg.getReplicationDeg());
 			newChunk.setData(msg.getBody());
+			System.out.println(msg.getBody().length()+"|"+newChunk.getSize());
 			allStoredChunks.add(newChunk);
 		}
 		System.out.println("->" + allStoredChunks.size());
 		// STORED <Version> <FileId> <ChunkNo> <CRLF><CRLF>
 		String header = "STORED" + " 1.0 " + msg.getFileId() + " "
-				+ msg.getChunkNo() + " " + Message.CRLF + Message.CRLF;
+				+ msg.getChunkNo()+Message.CRLF + Message.CRLF;
 		try {
 			int randomDelay = ThreadLocalRandom.current().nextInt(1, 400);
 			Thread.sleep(randomDelay); // waits random delay before sending
@@ -62,8 +70,11 @@ public class Backup {
 				
 				if(!allStoredChunks.get(i).exceedsReplication())
 					MC.send(header.getBytes());
-				else
+				else{
+					System.out.println("REMOVING:"+allStoredChunks.size()+allStoredChunks.get(i).exceedsReplication());
 					allStoredChunks.remove(i);
+					
+				}
 			}
 			}
 			
@@ -76,50 +87,85 @@ public class Backup {
 
 	}
 
+	public boolean backFile(String filename, int rep) throws NoSuchAlgorithmException, IOException, InterruptedException{
+		if(!split(new File(filename),rep))
+			return false;
+		return true;
+	}
+	
 	public boolean split(File file, int replicationDeg)
-			throws NoSuchAlgorithmException, IOException {
+			throws NoSuchAlgorithmException, IOException, InterruptedException {
 		int bytesRead, chunkNo = 0;
-		String bitString = file.getName() + file.lastModified();
+		String filename = file.getName();
+		String bitString = filename + file.lastModified();
 		String fileID = SHA256.apply(bitString);
 		BufferedInputStream fileBuffer = new BufferedInputStream(
 				new FileInputStream(file));
 		byte[] buffer = new byte[chuckSize];
+		byte[] newbuffer;
 		Chunk chunk;
 
 		while ((bytesRead = fileBuffer.read(buffer)) > 0) {
+			newbuffer = Arrays.copyOfRange(buffer, 0,bytesRead);
+			
 			chunk = new Chunk(fileID, chunkNo, replicationDeg);
-			if(!sendChunk(chunk, buffer))
+			if(!sendChunk(chunk, buffer, "MDB"))
 				return false;
 
 			allBackedChunks.add(chunk);
 			chunkNo++;
+			totalChunks.put(fileID, chunkNo);
 		}
+		backedFiles.put(filename, fileID);
 		return true;
 	}
 
-	public boolean sendChunk(Chunk chunk, byte[] data) throws IOException {
+	public boolean sendChunk(Chunk chunk, byte[] data, String strChannel) throws IOException, InterruptedException {
 
 		int timeout = INIT_BACKUP_TIMEOUT;
 		int tries = 0;
+		String header;
+
 
 		while (tries < MAX_TRIES) {
-			currentChunk = chunk;
-			chunk.resetStoredPeers();
-			putChunk(chunk.fileId, chunk.chunkNo, chunk.replicationDeg, data);
-
-			try {
+			if(strChannel.equals("MDB")){
+				currentChunk = chunk;
+				chunk.resetStoredPeers();
+				//PUTCHUNK <Version> <FileId> <ChunkNo> <ReplicationDeg> <CRLF> <CRLF> <Body>
+				header = "PUTCHUNK" + " 1.0 " + chunk.fileId + " " + chunk.chunkNo + " "
+						+ chunk.replicationDeg + Message.CRLF + Message.CRLF;
+				sendChunkToChannel(MDB, data, header);
+				
 				Thread.sleep(timeout);
-				timeout *= 2;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("TIMED OUT" + chunk.isDesiredReplication()
-					+ " # ChunkNo " + chunk.chunkNo + "# PeerStored "
-					+ chunk.getNumberStored() + "#");
+				timeout *= 2;	
+				
+				System.out.println("TIMED OUT MDB" + chunk.isDesiredReplication()
+						+ " # ChunkNo " + chunk.chunkNo + "# PeerStored "
+						+ chunk.getNumberStored() + "#");
 
-			if (chunk.isDesiredReplication())
+				if (chunk.isDesiredReplication())
+					break;
+			}
+			else if(strChannel.equals("MDR")){
+				//CHUNK <Version> <FileId> <ChunkNo> <CRLF> <CRLF> <Body>
+				header = "CHUNK"+ " 1.0 " + chunk.fileId + " " + chunk.chunkNo + Message.CRLF + Message.CRLF;
+				int randomDelay = ThreadLocalRandom.current().nextInt(1, 400);
+				Thread.sleep(randomDelay); // waits random delay before sending
+				
+				sendChunkToChannel(MDR, data, header);
+				
+				
 				break;
+				/*Thread.sleep(timeout);
+				timeout *= 2;	
+			
+				System.out.println("TIMED OUT MDR" + " # ChunkNo " + chunk.chunkNo );
+
+				if (chunk.isDesiredReplication())
+					break;*/
+				
+			}
+				
 			tries++;
 		}
 		if (tries == MAX_TRIES)
@@ -130,18 +176,17 @@ public class Backup {
 
 	}
 
-	public void putChunk(String fileId, int chunkNo, int replicationDeg,
-			byte[] data) throws IOException {
-		String header = "PUTCHUNK" + " 1.0 " + fileId + " " + chunkNo + " "
-				+ replicationDeg + Message.CRLF + Message.CRLF;
+	public void sendChunkToChannel(SubscribeChannel channel, byte[] data, String header) throws IOException {
+		
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header.getBytes());
-		/*if (data != null)
-			outputStream.write(data);*/
-		outputStream.write("HEY".getBytes());
+		if (data != null){
+			System.out.println((new String(data)).length());
+			outputStream.write(data);
+		}
 
-		MDB.send(outputStream.toByteArray());
-		System.out.println("PUTCHUNK " + fileId + "\n");
+		channel.send(outputStream.toByteArray());
+		System.out.println("SENDING CHUNK:"+header+"\n");
 
 	}
 

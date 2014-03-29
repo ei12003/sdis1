@@ -16,7 +16,8 @@ public class Message {
 		String msg = new String(message);
 		String[] temp = msg.split(" ",6);
 		messageType = temp[0];
-
+//if(messageType.equals("GETCHUNK"))
+	//System.out.println("hey");
 		if (messageType.equals("DELETE")) {
 			fileId = temp[1];
 		} else {
@@ -58,7 +59,7 @@ public class Message {
 
 	public byte[] getData() {
 		// TODO Auto-generated method stub
-		return null;
+		return body.getBytes();
 	}
 
 	public String getBody() {

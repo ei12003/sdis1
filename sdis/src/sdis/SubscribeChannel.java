@@ -4,6 +4,7 @@ package sdis;
 import java.io.Console;
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SubscribeChannel implements Runnable {
@@ -14,6 +15,7 @@ public class SubscribeChannel implements Runnable {
 	private String strAdress;
 	private int port;
 	private Backup backup;
+	private Restore restore;
 
 	public SubscribeChannel(String strAdress, String strPort)
 			throws IOException {
@@ -49,6 +51,7 @@ public class SubscribeChannel implements Runnable {
 
 		newPacket = Arrays.copyOfRange(receivePacket.getData(), 0,
 				receivePacket.getLength());
+		System.out.println("GET LENGTH"+newPacket.length);
 		String asd=new String(newPacket);
 System.out.println("==>"+asd);
 		String[] r = { receivePacket.getAddress().toString().split("/")[1],
@@ -98,16 +101,42 @@ System.out.println("==>"+asd);
 						if(backup.currentChunk!=null)
 							backup.currentChunk.addStoredPeer(peer);
 					}
-					if (messageType.equals("GETCHUNK")) {
+					else if (messageType.equals("GETCHUNK")) {
+						
+						ArrayList<Chunk>  allStoredChunks = backup.allStoredChunks;
+						System.out.println("GETTIN"+allStoredChunks.size());
+						//CHUNK <Version> <FileId> <ChunkNo> <CRLF> <CRLF> <Body>
+						for (int i = 0; i < allStoredChunks.size(); i++) {
+							System.out.println("SENDCHUNK");
+							// System.out.println("!"+allStoredChunks.size()+"!"+allStoredChunks.get(i).chunkNo+"||"+msg.getChunkNo());
+							if (msg.getFileId().equals(allStoredChunks.get(i).fileId)
+									&& (msg.getChunkNo() == allStoredChunks.get(i).chunkNo)) {
+								
+								
+								try {
+									System.out.println(allStoredChunks.get(i).data.length);
+									backup.sendChunk(allStoredChunks.get(i), allStoredChunks.get(i).data,"MDR");
+								} catch (IOException | InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						}
+						
+					}
+					else if (messageType.equals("DELETE")) {
 
 					}
-					if (messageType.equals("DELETE")) {
+					else if (messageType.equals("REMOVED")) {
 
 					}
-					if (messageType.equals("REMOVED")) {
-
+					else if(messageType.equals("CHUNK")){
+						Chunk chunk = new Chunk(msg.getFileId(),msg.getChunkNo(),0);
+						chunk.setData(msg.getData());
+						restore.fileRestoring.add(chunk);
+						System.out.println("CHUUUNK");
 					}
-					if (messageType.equals("PUTCHUNK")) {
+					else if (messageType.equals("PUTCHUNK")) {
 						System.out.println("Received PUTCHUNK from "
 								+ strAdress);
 						backup.saveChunk(msg);
@@ -125,5 +154,10 @@ System.out.println("==>"+asd);
 	public void setBackup(Backup backup) {
 		this.backup = backup;
 
+	}
+
+	public void setRestore(Restore restore) {
+		this.restore = restore;
+		
 	}
 }
