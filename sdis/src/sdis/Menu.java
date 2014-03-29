@@ -15,42 +15,38 @@ public class Menu {
 	public void menu(String args[]) throws NoSuchAlgorithmException, IOException{
 		if(args.length==7){
 			Peer peer = new Peer(args[0],args[1],args[2],args[3],args[4],args[5]);
+			DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date dateMC = new Date();
+			System.out.print(dateFormatMC.format(dateMC));
+			System.out.println(" => MC: Init at " + args[0]);
+			DateFormat dateFormatMDB = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date dateMDB = new Date();
+			System.out.print(dateFormatMDB.format(dateMDB));
+			System.out.println(" => MDB: Init at " + args[2]);
+			DateFormat dateFormatMDR = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date dateMDR = new Date();
+			System.out.print(dateFormatMDR.format(dateMDR));
+			System.out.println(" => MDR: Init at " + args[4]);
 		}
 		else{
 			Peer peer = new Peer("225.4.5.6","5340","225.4.5.7","5341","225.4.5.8","5342");
+			DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date dateMC = new Date();
+			System.out.print(dateFormatMC.format(dateMC));
+			System.out.println(" => MC: Init at " + "225.4.5.6");
+			DateFormat dateFormatMDB = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date dateMDB = new Date();
+			System.out.print(dateFormatMDB.format(dateMDB));
+			System.out.println(" => MDB: Init at " + "225.4.5.7");
+			DateFormat dateFormatMDR = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date dateMDR = new Date();
+			System.out.print(dateFormatMDR.format(dateMDR));
+			System.out.println(" => MDR: Init at " + "225.4.5.8");
 		}
 		
 		m=new SplitMessage();
 		String input="";
 		while(!input.equals("q")){
-			if(args.length==7){
-				DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				Date dateMC = new Date();
-				System.out.print(dateFormatMC.format(dateMC));
-				System.out.println(" => MC: Init at " + args[0]);
-				DateFormat dateFormatMDB = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				Date dateMDB = new Date();
-				System.out.print(dateFormatMDB.format(dateMDB));
-				System.out.println(" => MDB: Init at " + args[2]);
-				DateFormat dateFormatMDR = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				Date dateMDR = new Date();
-				System.out.print(dateFormatMDR.format(dateMDR));
-				System.out.println(" => MDR: Init at " + args[4]);
-			}
-			else{
-				DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				Date dateMC = new Date();
-				System.out.print(dateFormatMC.format(dateMC));
-				System.out.println(" => MC: Init at " + "225.4.5.6");
-				DateFormat dateFormatMDB = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				Date dateMDB = new Date();
-				System.out.print(dateFormatMDB.format(dateMDB));
-				System.out.println(" => MDB: Init at " + "225.4.5.7");
-				DateFormat dateFormatMDR = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				Date dateMDR = new Date();
-				System.out.print(dateFormatMDR.format(dateMDR));
-				System.out.println(" => MDR: Init at " + "225.4.5.8");
-			}
 			// 1. Create a Scanner using the InputStream available.
 			Scanner scanner = new Scanner( System.in );
 
