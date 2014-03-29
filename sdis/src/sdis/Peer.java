@@ -49,6 +49,7 @@ public class Peer {
 			String fileId = backup.backedFiles.get("file.jpg");
 			System.out.println("<<EXISTS>>:" + fileId + "\n<<TOTAL CHUNKS>>:"
 					+ backup.totalChunks.get(fileId) + "<<STORED>>:"+backup.allStoredChunks.size());
+			restore.restoringATM=true;
 			if(!restore.restoreFile("file.jpg"))
 				System.out.println("FAILED RESTORING");
 			else
