@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 public class Peer {
 	private SubscribeChannel MC,MDB,MDR;
@@ -41,14 +42,14 @@ public class Peer {
 			}
 			System.out.println("oi");
 		}*/
-		if(!backup.backFile("sd.pro",1))
+		if(!backup.backFile("file.jpg",1))
 			System.out.println("FAILED");
 		else{
 			System.out.println("BACKED");
-			String fileId = backup.backedFiles.get("sd.pro");
+			String fileId = backup.backedFiles.get("file.jpg");
 			System.out.println("<<EXISTS>>:" + fileId + "\n<<TOTAL CHUNKS>>:"
 					+ backup.totalChunks.get(fileId) + "<<STORED>>:"+backup.allStoredChunks.size());
-			if(!restore.restoreFile("sd.pro"))
+			if(!restore.restoreFile("file.jpg"))
 				System.out.println("FAILED RESTORING");
 			else
 				System.out.println("RESTORED");
@@ -56,8 +57,7 @@ public class Peer {
 		
 		//MDB.setBackup(backup);
 		//MDR.setBackup(backup);
-		
-	
+
 			 
 		
 	}

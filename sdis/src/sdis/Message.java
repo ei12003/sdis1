@@ -1,5 +1,7 @@
 package sdis;
 
+import java.util.Arrays;
+
 public class Message {
 	// <MessageType> <Version> <FileId> <ChunkNo> <ReplicationDeg> <CRLF>
 	public static final char CHARSQ1=0xD;
@@ -10,10 +12,22 @@ public class Message {
 	private String fileId;
 	private int chunkNo;
 	private int replicationDeg;
-	private String body;
+	private byte[] body;
 
-	public Message(String message) {
-		String msg = new String(message);
+	public byte[] splitBody(byte[] data){
+		for(int i=0;i<data.length;i++){
+			if(data[i]==13 && data[i+1]==10 && data[i+2]==13 && data[i+3]==10){
+				byte[] body = Arrays.copyOfRange(data, i+4, data.length);
+					return body;
+			}
+			
+		}
+		System.out.println("BODYNULL");
+		return null;
+	}
+	
+	public Message(byte[] messageBytes) {
+		String msg = new String(messageBytes);
 		String[] temp = msg.split(" ",6);
 		messageType = temp[0];
 //if(messageType.equals("GETCHUNK"))
@@ -31,7 +45,7 @@ public class Message {
 			fileId = temp[2];
 
 			if (messageType.equals("PUTCHUNK") || messageType.equals("CHUNK")){
-				body=msg.split(CRLF+CRLF,2)[1];
+				body=splitBody(messageBytes);
 				//System.out.println(body.length()+"$$$$$$$$$$$\n"+body+"\n$$$$$$$$$$");
 			}
 		}
@@ -59,12 +73,10 @@ public class Message {
 
 	public byte[] getData() {
 		// TODO Auto-generated method stub
-		return body.getBytes();
-	}
-
-	public String getBody() {
 		return body;
 	}
+
+	
 
 
 }

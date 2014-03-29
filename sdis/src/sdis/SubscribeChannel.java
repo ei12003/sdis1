@@ -29,18 +29,18 @@ public class SubscribeChannel implements Runnable {
 		multiSocket.joinGroup(InetAddress.getByName(strAdress));
 	}
 
-	public String[] receive() throws IOException {
+	public byte[][] receive() throws IOException {
 		byte[] newPacket;
 		receiveData = new byte[65000];
 		receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
-		// do {
+		 do {
 
 		multiSocket.receive(receivePacket);
 
-		// System.out.println(InetAddress.getLocalHost().getHostAddress().toString()+receivePacket.getAddress().toString());
-		// } while (InetAddress.getLocalHost().getHostAddress().toString()
-		// .equals(receivePacket.getAddress().toString().split("/")[1]));
+		 System.out.println(InetAddress.getLocalHost().getHostAddress().toString()+receivePacket.getAddress().toString());
+		 } while (InetAddress.getLocalHost().getHostAddress().toString()
+		 .equals(receivePacket.getAddress().toString().split("/")[1]));
 
 		// System.out.write(receivePacket.getData(), 0,
 		// receivePacket.getLength());
@@ -53,9 +53,9 @@ public class SubscribeChannel implements Runnable {
 				receivePacket.getLength());
 		System.out.println("GET LENGTH"+newPacket.length);
 		String asd=new String(newPacket);
-System.out.println("==>"+asd);
-		String[] r = { receivePacket.getAddress().toString().split("/")[1],
-				new String(newPacket) };
+		System.out.println("==>"+asd);
+		byte[][] r = { receivePacket.getAddress().toString().split("/")[1].getBytes(),
+				newPacket };
 		return r;
 
 	}
@@ -74,7 +74,7 @@ System.out.println("==>"+asd);
 	@Override
 	public void run() {
 
-		String[] tmp = new String[2];
+		byte[][] tmp=null;
 
 		while (true) {
 			try {
@@ -84,14 +84,14 @@ System.out.println("==>"+asd);
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			final String[] received = tmp;
+			final byte[][] received = tmp;
 			Thread t = new Thread(new Runnable() {
 
 				public void run() {
 					String peer, message, messageType;
 					Message msg;
 
-					peer = received[0];
+					peer = new String(received[0]);
 					msg = new Message(received[1]);
 					messageType = msg.getMessageType();
 
@@ -133,7 +133,7 @@ System.out.println("==>"+asd);
 					else if(messageType.equals("CHUNK")){
 						Chunk chunk = new Chunk(msg.getFileId(),msg.getChunkNo(),0);
 						chunk.setData(msg.getData());
-						restore.fileRestoring.add(chunk);
+						restore.fileRestoring.put(msg.getChunkNo(), chunk);
 						System.out.println("CHUUUNK");
 					}
 					else if (messageType.equals("PUTCHUNK")) {

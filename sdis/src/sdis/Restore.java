@@ -3,17 +3,18 @@ package sdis;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Restore {
 	SubscribeChannel MDR, MC;
-	ArrayList<Chunk> fileRestoring;
+	ConcurrentHashMap<Integer,Chunk> fileRestoring;
 	Backup backup;
 
 	public Restore(SubscribeChannel MDR, SubscribeChannel MC, Backup backup) {
 		this.MDR = MDR;
 		this.MC = MC;
 		this.backup = backup;
-		fileRestoring = new ArrayList<Chunk>();
+		fileRestoring = new ConcurrentHashMap<Integer,Chunk>();
 	}
 
 	public boolean getChunks(int total, String fileId) {
@@ -32,7 +33,7 @@ public class Restore {
 					//timeout *= 2;
 					for(int j=0;j<fileRestoring.size();j++)
 					{
-						if(fileRestoring.get(j).chunkNo == i){
+						if(fileRestoring.containsKey(i)){
 							exists=true;
 							break;
 						}	
@@ -67,8 +68,10 @@ public class Restore {
 			if(!getChunks(backup.totalChunks.get(fileId), fileId))
 				return false;
 			else{
-				FileOutputStream fos = new FileOutputStream("pathname.txt");
+				FileOutputStream fos = new FileOutputStream("pathname.jpg");
+				System.out.println(fileRestoring.size());
 				for(int i=0;i<fileRestoring.size();i++){
+					System.out.println("s:"+fileRestoring.get(i).data.length);
 					fos.write(fileRestoring.get(i).data);
 				}
 				fos.close();

@@ -52,8 +52,8 @@ public class Backup {
 			System.out.println("????????");
 			Chunk newChunk = new Chunk(msg.getFileId(), msg.getChunkNo(),
 					msg.getReplicationDeg());
-			newChunk.setData(msg.getBody());
-			System.out.println(msg.getBody().length()+"|"+newChunk.getSize());
+			newChunk.setData(msg.getData());
+			System.out.println(msg.getData().length+"|"+newChunk.getSize());
 			allStoredChunks.add(newChunk);
 		}
 		System.out.println("->" + allStoredChunks.size());
@@ -109,7 +109,7 @@ public class Backup {
 			newbuffer = Arrays.copyOfRange(buffer, 0,bytesRead);
 			
 			chunk = new Chunk(fileID, chunkNo, replicationDeg);
-			if(!sendChunk(chunk, buffer, "MDB"))
+			if(!sendChunk(chunk, newbuffer, "MDB"))
 				return false;
 
 			allBackedChunks.add(chunk);
@@ -181,7 +181,7 @@ public class Backup {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header.getBytes());
 		if (data != null){
-			System.out.println((new String(data)).length());
+			System.out.println("LEEEEn"+(new String(data)).length());
 			outputStream.write(data);
 		}
 

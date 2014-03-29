@@ -62,10 +62,7 @@ public class Chunk {
 			return false;		
 	}
 
-	public void setData(String body) {
-		this.data=body.getBytes();
-		chunkSize=body.length();
-	}
+
 	public synchronized int getSize(){
 		return chunkSize;
 	}
