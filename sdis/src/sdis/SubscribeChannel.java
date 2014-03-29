@@ -15,6 +15,7 @@ public class SubscribeChannel implements Runnable {
 	private String strAdress;
 	private int port;
 	private Backup backup;
+	
 	private Restore restore;
 
 	public SubscribeChannel(String strAdress, String strPort)
@@ -52,8 +53,7 @@ public class SubscribeChannel implements Runnable {
 		newPacket = Arrays.copyOfRange(receivePacket.getData(), 0,
 				receivePacket.getLength());
 		System.out.println("GET LENGTH"+newPacket.length);
-		String asd=new String(newPacket);
-		System.out.println("==>"+asd);
+
 		byte[][] r = { receivePacket.getAddress().toString().split("/")[1].getBytes(),
 				newPacket };
 		return r;
@@ -131,10 +131,12 @@ public class SubscribeChannel implements Runnable {
 
 					}
 					else if(messageType.equals("CHUNK")){
+						if(restore.restoringATM){
 						Chunk chunk = new Chunk(msg.getFileId(),msg.getChunkNo(),0);
 						chunk.setData(msg.getData());
 						restore.fileRestoring.put(msg.getChunkNo(), chunk);
 						System.out.println("CHUUUNK");
+						}
 					}
 					else if (messageType.equals("PUTCHUNK")) {
 						System.out.println("Received PUTCHUNK from "

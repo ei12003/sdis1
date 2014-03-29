@@ -9,12 +9,13 @@ public class Restore {
 	SubscribeChannel MDR, MC;
 	ConcurrentHashMap<Integer,Chunk> fileRestoring;
 	Backup backup;
-
+	public boolean restoringATM;
 	public Restore(SubscribeChannel MDR, SubscribeChannel MC, Backup backup) {
 		this.MDR = MDR;
 		this.MC = MC;
 		this.backup = backup;
 		fileRestoring = new ConcurrentHashMap<Integer,Chunk>();
+		restoringATM = false;
 	}
 
 	public boolean getChunks(int total, String fileId) {
