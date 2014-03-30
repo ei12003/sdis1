@@ -64,13 +64,14 @@ public class Restore implements Serializable {
 
 	public boolean restoreFile(String string) throws IOException {
 		String fileId = backup.backedFiles.get(string);
+		System.out.println(">>>"+string+backup.backedFiles.get(string));
 		if (fileId != null) {
 			System.out.println("<<EXISTS>>:" + fileId + "\n<<TOTAL CHUNKS>>:"
 					+ backup.totalChunks.get(fileId) + "<<STORED>>:"+backup.allStoredChunks.size());
 			if(!getChunks(backup.totalChunks.get(fileId), fileId))
 				return false;
 			else{
-				FileOutputStream fos = new FileOutputStream("pathname.jpg");
+				FileOutputStream fos = new FileOutputStream(string);
 				System.out.println(fileRestoring.size());
 				for(int i=0;i<fileRestoring.size();i++){
 					System.out.println("s:"+fileRestoring.get(i).data.length);

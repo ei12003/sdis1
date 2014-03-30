@@ -155,7 +155,7 @@ public class Menu {
 			}
 			else if(splits[0].equals("RESTORE")){
 				peer.restore.restoringATM=true;
-				if(!peer.restore.restoreFile("file.jpg"))
+				if(!peer.restore.restoreFile(splits[1]))
 					System.out.println("FAILED RESTORING");
 				peer.restore.restoringATM=false;
 
@@ -224,7 +224,7 @@ public class Menu {
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
 	        System.out.println("FileName:"+pairs.getKey() + " | FileId: " + pairs.getValue());
-	        it.remove(); // avoids a ConcurrentModificationException
+
 	    }
 	}
 }
