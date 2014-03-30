@@ -42,20 +42,14 @@ public class SubscribeChannel implements Runnable {
 
 		multiSocket.receive(receivePacket);
 
-		 System.out.println(InetAddress.getLocalHost().getHostAddress().toString()+receivePacket.getAddress().toString());
+		// System.out.println(InetAddress.getLocalHost().getHostAddress().toString()+receivePacket.getAddress().toString());
 		 } while (InetAddress.getLocalHost().getHostAddress().toString()
 		 .equals(receivePacket.getAddress().toString().split("/")[1]));
 
-		// System.out.write(receivePacket.getData(), 0,
-		// receivePacket.getLength());
-		// System.out.println();
-
-		// multiSocket.leaveGroup(InetAddress.getByName(strAdress));
-		// multiSocket.close();
 
 		newPacket = Arrays.copyOfRange(receivePacket.getData(), 0,
 				receivePacket.getLength());
-		System.out.println("GET LENGTH"+newPacket.length);
+		
 
 		byte[][] r = { receivePacket.getAddress().toString().split("/")[1].getBytes(),
 				newPacket };
@@ -99,7 +93,7 @@ public class SubscribeChannel implements Runnable {
 					messageType = msg.getMessageType();
 
 					if (messageType.equals("STORED")) {
-						System.out.println("RECEIVED STORE" + strAdress);
+						System.out.println("RECEIVED STORE from " + peer);
 						backup.updateChunkPeers(msg,peer);
 						if(backup.currentChunk!=null)
 							backup.currentChunk.addStoredPeer(peer);
@@ -127,17 +121,17 @@ public class SubscribeChannel implements Runnable {
 					else if (messageType.equals("GETCHUNK")) {
 						
 						ArrayList<Chunk>  allStoredChunks = backup.allStoredChunks;
-						System.out.println("GETTIN"+allStoredChunks.size());
+						
 						//CHUNK <Version> <FileId> <ChunkNo> <CRLF> <CRLF> <Body>
 						for (int i = 0; i < allStoredChunks.size(); i++) {
-							System.out.println("SENDCHUNK");
-							// System.out.println("!"+allStoredChunks.size()+"!"+allStoredChunks.get(i).chunkNo+"||"+msg.getChunkNo());
+							
+							
 							if (msg.getFileId().equals(allStoredChunks.get(i).fileId)
 									&& (msg.getChunkNo() == allStoredChunks.get(i).chunkNo)) {
 								
 								
 								try {
-									System.out.println(allStoredChunks.get(i).data.length);
+									
 									backup.sendChunk(allStoredChunks.get(i), allStoredChunks.get(i).data,"MDR",false);
 								} catch (IOException | InterruptedException e) {
 									// TODO Auto-generated catch block
@@ -162,7 +156,7 @@ public class SubscribeChannel implements Runnable {
 						Chunk chunk = new Chunk(msg.getFileId(),msg.getChunkNo(),0);
 						chunk.setData(msg.getData());
 						restore.fileRestoring.put(msg.getChunkNo(), chunk);
-						System.out.println("CHUUUNK");
+						
 						}
 					}
 					else if (messageType.equals("PUTCHUNK")) {

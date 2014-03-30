@@ -56,7 +56,7 @@ public class Chunk implements Serializable{
 	}
 	public synchronized boolean exceedsReplication(){
 		if(this.getNumberStored()>replicationDeg){
-			//System.out.println("EXCEEDS");
+			
 			return true;
 		}
 		else

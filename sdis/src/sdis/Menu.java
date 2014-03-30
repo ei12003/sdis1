@@ -28,8 +28,9 @@ public class Menu {
 	}
 	//ADD REPLICATIO
 	public void menu(String args[]) throws Exception{
-		if(args.length==7){
+		if(args.length==8){
 			peer = new Peer(args[0],args[1],args[2],args[3],args[4],args[5]);
+			rep=Integer.parseInt(args[6]);
 			DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date dateMC = new Date();
 			System.out.print(dateFormatMC.format(dateMC));
@@ -139,33 +140,14 @@ public class Menu {
 		        oos = new ObjectOutputStream(fout);
 		        oos.writeObject(peer.backup.totalChunks);
 		        oos.close();
-		        /* 
-		    	ArrayList<Chunk> allBackedChunks, allStoredChunks;
-		    	ConcurrentHashMap<String,String> backedFiles;
-		    	ConcurrentHashMap<String,Integer> totalChunks;*/
-		        
-		        
-				/*
-				if(!backup.backFile("file.jpg",2))
-					System.out.println("FAILED");
-				else{
-					System.out.println("BACKED");
-					String fileId = backup.backedFiles.get("file.jpg");
-					System.out.println("<<EXISTS>>:" + fileId + "\n<<TOTAL CHUNKS>>:"
-							+ backup.totalChunks.get(fileId) + "<<STORED>>:"+backup.allStoredChunks.size());
-					restore.restoringATM=true;
-					if(!restore.restoreFile("file.jpg"))
-						System.out.println("FAILED RESTORING");
-					else
-						System.out.println("RESTORED");
-				}*/
+		      
 				
 				
 			}
 			else if(splits[0].equals("RESTORE")){
 				peer.restore.restoringATM=true;
 				if(!peer.restore.restoreFile(splits[1]))
-					System.out.println("FAILED RESTORING");
+					System.out.println("Failed Restoring");
 				peer.restore.restoringATM=false;
 
 			}
@@ -179,11 +161,9 @@ public class Menu {
 		}
 	}
 	private void getPreviousCFG() throws Exception {
-		System.out.println("PREVIOUS");
 		File file;
 		FileInputStream fin;
-		//String[] files = {"allBackedChunks.bak","","",""};
-		//for(int i=0;i<files.size();i++){
+
 		
 		file = new File("allBackedChunks.bak");    
 		if (file.exists()) {

@@ -28,7 +28,7 @@ public class Message {
 			}
 			
 		}
-		System.out.println("BODYNULL");
+		
 		return null;
 	}
 	
@@ -36,10 +36,9 @@ public class Message {
 		String msg = new String(messageBytes);
 		String[] temp = msg.split(" ",6);
 		messageType = temp[0];
-//if(messageType.equals("GETCHUNK"))
-	//System.out.println("hey");
+
 		if (messageType.equals("DELETE")) {
-			//fileId = temp[1];
+
 			fileId = new String(splitBody(temp[1].getBytes(),2));
 			
 		} else {
@@ -54,7 +53,7 @@ public class Message {
 
 			if (messageType.equals("PUTCHUNK") || messageType.equals("CHUNK")){
 				body=splitBody(messageBytes,1);
-				//System.out.println(body.length()+"$$$$$$$$$$$\n"+body+"\n$$$$$$$$$$");
+				
 			}
 		}
 	}

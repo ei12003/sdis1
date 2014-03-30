@@ -46,26 +46,25 @@ public class Backup implements Serializable{
 	
 	public synchronized void saveChunk(Message msg) {
 		boolean go = true;
-		if (msg.getChunkNo() == 10)
-			System.out.println("sup");
+
 		for (int i = 0; i < allStoredChunks.size(); i++) {
-			 System.out.println("!!!!!!"+allStoredChunks.size()+"!"+allStoredChunks.get(i).chunkNo+"||"+msg.getChunkNo());
+			
 			if (msg.getFileId().equals(allStoredChunks.get(i).fileId)
 					&& (msg.getChunkNo() == allStoredChunks.get(i).chunkNo)) {
 				allStoredChunks.get(i).resetStoredPeers();
-				System.out.println("REPEATED: " + msg.getChunkNo());
+				System.out.println("Already has ChunkNo" + msg.getChunkNo() + " from " + msg.getFileId());
 				go = false;
 			}
 		}
 		if (go) {
-			System.out.println("????????");
+			
 			Chunk newChunk = new Chunk(msg.getFileId(), msg.getChunkNo(),
 					msg.getReplicationDeg());
 			newChunk.setData(msg.getData());
-			System.out.println(msg.getData().length+"|"+newChunk.getSize());
+			
 			allStoredChunks.add(newChunk);
 		}
-		System.out.println("->" + allStoredChunks.size());
+		
 		// STORED <Version> <FileId> <ChunkNo> <CRLF><CRLF>
 		String header = "STORED" + " 1.0 " + msg.getFileId() + " "
 				+ msg.getChunkNo()+Message.CRLF + Message.CRLF;
@@ -82,7 +81,7 @@ public class Backup implements Serializable{
 			        
 				}
 				else{
-					System.out.println("REMOVING:"+allStoredChunks.size()+allStoredChunks.get(i).exceedsReplication());
+					
 					allStoredChunks.remove(i);
 					
 				}
@@ -172,7 +171,7 @@ public class Backup implements Serializable{
 
 		}
 		if(bytesRead2==64000){
-			System.out.println("BYTESREAD2");
+			
 			newbuffer = null;
 			
 			chunk = new Chunk(fileID, chunkNo, replicationDeg);
@@ -243,13 +242,7 @@ public class Backup implements Serializable{
 				
 				
 				break;
-				/*Thread.sleep(timeout);
-				timeout *= 2;	
-			
-				System.out.println("TIMED OUT MDR" + " # ChunkNo " + chunk.chunkNo );
 
-				if (chunk.isDesiredReplication())
-					break;*/
 				
 			}
 				
@@ -268,21 +261,21 @@ public class Backup implements Serializable{
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		outputStream.write(header.getBytes());
 		if (data != null){
-			System.out.println("LEEEEn"+(new String(data)).length());
+			
 			outputStream.write(data);
 		}
 
 		channel.send(outputStream.toByteArray());
-		System.out.println("SENDING CHUNK:"+header+"\n");
+		System.out.println("SENDING CHUNK:"+header);
 
 	}
 
 	public void updateChunkPeers(Message msg, String peer) {
 		for (int i = 0; i < allStoredChunks.size(); i++) {
-			// System.out.println("!"+allStoredChunks.size()+"!"+allStoredChunks.get(i).chunkNo+"||"+msg.getChunkNo());
+			
 			if (msg.getFileId().equals(allStoredChunks.get(i).fileId)
 					&& (msg.getChunkNo() == allStoredChunks.get(i).chunkNo)) {
-				System.out.println("REPEATED: " + msg.getChunkNo());
+				
 				allStoredChunks.get(i).addStoredPeer(peer);
 			}
 		}
@@ -336,7 +329,7 @@ public class Backup implements Serializable{
 				}
 				}
 					
-				System.out.println("ChunkNo: "+msg.getChunkNo()+"removed");
+				System.out.println("ChunkNo: "+msg.getChunkNo()+" from "+msg.getFileId()+" removed");
 				return true;
 			}
 		}

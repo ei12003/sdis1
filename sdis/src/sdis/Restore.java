@@ -41,11 +41,10 @@ public class Restore implements Serializable {
 						}	
 					}
 					if(exists){
-						System.out.println(">>>>>EXISTE");
+						
 						break;
 					}
-					else
-						System.out.println(">>>>>NAOEXISTE"+tries);
+					
 					tries++;
 				}
 				if (tries == backup.MAX_TRIES)
@@ -64,21 +63,21 @@ public class Restore implements Serializable {
 
 	public boolean restoreFile(String string) throws IOException {
 		String fileId = backup.backedFiles.get(string);
-		System.out.println(">>>"+string+backup.backedFiles.get(string));
+		
 		if (fileId != null) {
 			System.out.println("<<EXISTS>>:" + fileId + "\n<<TOTAL CHUNKS>>:"
-					+ backup.totalChunks.get(fileId) + "<<STORED>>:"+backup.allStoredChunks.size());
+					+ backup.totalChunks.get(fileId) + "\nRestoring...");
 			if(!getChunks(backup.totalChunks.get(fileId), fileId))
 				return false;
 			else{
 				FileOutputStream fos = new FileOutputStream(string);
-				System.out.println(fileRestoring.size());
+				
 				for(int i=0;i<fileRestoring.size();i++){
-					System.out.println("s:"+fileRestoring.get(i).data.length);
+					
 					fos.write(fileRestoring.get(i).data);
 				}
 				fos.close();
-				System.out.println("RESTORED");
+				System.out.println("File Restored");
 				return true;
 			}
 		} else

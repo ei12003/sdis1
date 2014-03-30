@@ -20,7 +20,7 @@ public class Peer {
 		MC = new SubscribeChannel(MCaddr,MCport);
 		MDB = new SubscribeChannel(MDBaddr,MDBport);
 		MDR= new SubscribeChannel(MDRaddr,MDRport);
-		System.out.println(MCaddr+"|"+MDBaddr+"|"+MDRaddr);
+		
 		threadMC= new Thread(MC);
 		threadMDB= new Thread(MDB);
 		threadMDR= new Thread(MDR);
@@ -36,33 +36,7 @@ public class Peer {
 		threadMDB.start();
 		threadMDR.start();
 		
-		/*while(true){
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("oi");
-		}*/
-		/*if(!backup.backFile("file.jpg",2))
-			System.out.println("FAILED");
-		else{
-			System.out.println("BACKED");
-			String fileId = backup.backedFiles.get("file.jpg");
-			System.out.println("<<EXISTS>>:" + fileId + "\n<<TOTAL CHUNKS>>:"
-					+ backup.totalChunks.get(fileId) + "<<STORED>>:"+backup.allStoredChunks.size());
-			restore.restoringATM=true;
-			if(!restore.restoreFile("file.jpg"))
-				System.out.println("FAILED RESTORING");
-			else
-				System.out.println("RESTORED");
-		}*/
-		
-		//MDB.setBackup(backup);
-		//MDR.setBackup(backup);
-
-			 
+				 
 		
 	}
 
