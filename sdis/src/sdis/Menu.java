@@ -1,20 +1,35 @@
 package sdis;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
 
 public class Menu {
 	private static SplitMessage m;
+	private Peer peer;
+	private int rep=1;
 	public Menu(){
 		
 	}
-	public void menu(String args[]) throws NoSuchAlgorithmException, IOException{
+	//ADD REPLICATIO
+	public void menu(String args[]) throws Exception{
 		if(args.length==7){
-			Peer peer = new Peer(args[0],args[1],args[2],args[3],args[4],args[5]);
+			peer = new Peer(args[0],args[1],args[2],args[3],args[4],args[5]);
 			DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date dateMC = new Date();
 			System.out.print(dateFormatMC.format(dateMC));
@@ -29,7 +44,7 @@ public class Menu {
 			System.out.println(" => MDR: Init at " + args[4]);
 		}
 		else{
-			Peer peer = new Peer("225.4.5.6","5340","225.4.5.7","5341","225.4.5.8","5342");
+			peer = new Peer("225.4.5.6","5340","225.4.5.7","5341","225.4.5.8","5342");
 			DateFormat dateFormatMC = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date dateMC = new Date();
 			System.out.print(dateFormatMC.format(dateMC));
@@ -46,10 +61,13 @@ public class Menu {
 		
 		m=new SplitMessage();
 		String input="";
+		getPreviousCFG();
 		while(!input.equals("q")){
 			// 1. Create a Scanner using the InputStream available.
 			Scanner scanner = new Scanner( System.in );
 
+		
+			
 			// 2. Don't forget to prompt the user
 			System.out.print( "Type some data for the program: " );
 
@@ -59,12 +77,12 @@ public class Menu {
 
 			if(input.equals("h")||input.equals("H")){
 				System.out.println("Help:");
-				System.out.println("RESTORE fileID - restore a file by its fileID");
-				System.out.println("Restore filename - restore a file by its a name");
-				System.out.println("DELETE fileID - sent a DELETE  message for the file with id fileID");
+				
+				System.out.println("RESTORE filename - restore a file by its a name");
+				
 				System.out.println("DELETE filename - sent a DELETE message for the file with name filename");
 				System.out.println("");
-				System.out.println("REMOVE fileID N - sent a REMOVE message for chunk N of filleID");
+				
 				System.out.println("BACKUP filename - backup a file with name filename");
 				System.out.println("sb - show internal backup struct. Useful for debug only.");
 				System.out.println("ss - show internal store struct. Useful for debug only.");
@@ -72,10 +90,74 @@ public class Menu {
 				System.out.println("q - quit");
 				System.out.println("");
 			}
-			else if(splits[0].equals("BACKUP")/*bool*/){
+			else if(input.equals("sb")){
+				
+				System.out.println("\nBacked Files\n");
+				printMap(peer.backup.backedFiles);
+				
+				System.out.println("\nBackup Struct\n");
+				for(int i=0;i<peer.backup.allBackedChunks.size();i++)
+			      System.out.println("ChunkNo:"+peer.backup.allBackedChunks.get(i).chunkNo+" | TotalFileChunks:"+peer.backup.totalChunks.get(peer.backup.allBackedChunks.get(i).fileId)+" | FileID: "+peer.backup.allBackedChunks.get(i).fileId);
+								
+			}
+			else if(input.equals("ss")){
+				
 
+				
+				System.out.println("\nStored Struct"+peer.backup.allStoredChunks.size());
+				for(int i=0;i<peer.backup.allStoredChunks.size();i++)
+			      System.out.println("ChunkNo:"+peer.backup.allStoredChunks.get(i).chunkNo+" | FileID: "+peer.backup.allStoredChunks.get(i).fileId);
+								
+			}
+			else if(splits[0].equals("BACKUP")/*bool*/){
+				FileOutputStream fout;
+				 ObjectOutputStream oos;
+				 
+				if(!peer.backup.backFile(splits[1], rep)) 
+					System.out.println("\nBacked Failed!");
+				
+				fout = new FileOutputStream("allBackedChunks.bak");
+		        oos = new ObjectOutputStream(fout);
+		        oos.writeObject(peer.backup.allBackedChunks);
+		        oos.close();
+
+		        fout = new FileOutputStream("backedFiles.bak");
+		        oos = new ObjectOutputStream(fout);
+		        oos.writeObject(peer.backup.backedFiles);
+		        oos.close();
+		        
+		        fout = new FileOutputStream("totalChunks.bak");
+		        oos = new ObjectOutputStream(fout);
+		        oos.writeObject(peer.backup.totalChunks);
+		        oos.close();
+		        /* 
+		    	ArrayList<Chunk> allBackedChunks, allStoredChunks;
+		    	ConcurrentHashMap<String,String> backedFiles;
+		    	ConcurrentHashMap<String,Integer> totalChunks;*/
+		        
+		        
+				/*
+				if(!backup.backFile("file.jpg",2))
+					System.out.println("FAILED");
+				else{
+					System.out.println("BACKED");
+					String fileId = backup.backedFiles.get("file.jpg");
+					System.out.println("<<EXISTS>>:" + fileId + "\n<<TOTAL CHUNKS>>:"
+							+ backup.totalChunks.get(fileId) + "<<STORED>>:"+backup.allStoredChunks.size());
+					restore.restoringATM=true;
+					if(!restore.restoreFile("file.jpg"))
+						System.out.println("FAILED RESTORING");
+					else
+						System.out.println("RESTORED");
+				}*/
+				
+				
 			}
 			else if(splits[0].equals("RESTORE")){
+				peer.restore.restoringATM=true;
+				if(!peer.restore.restoreFile("file.jpg"))
+					System.out.println("FAILED RESTORING");
+				peer.restore.restoringATM=false;
 
 			}
 			else if(splits[0].equals("DELETE")){
@@ -91,5 +173,58 @@ public class Menu {
 				System.out.println("Wrong command. Enter h for help.");
 			}
 		}
+	}
+	private void getPreviousCFG() throws Exception {
+		System.out.println("PREVIOUS");
+		File file;
+		FileInputStream fin;
+		//String[] files = {"allBackedChunks.bak","","",""};
+		//for(int i=0;i<files.size();i++){
+		
+		file = new File("allBackedChunks.bak");    
+		if (file.exists()) {
+			System.out.println("Restoring allBackedChunks.bak");
+		    fin = new FileInputStream(file);
+		    ObjectInputStream restore = new ObjectInputStream(fin);
+		    peer.backup.allBackedChunks = (ArrayList<Chunk>)restore.readObject();
+		    restore.close();
+		}
+		
+		file = new File("allStoredChunks.bak");    
+		if (file.exists()) {
+			System.out.println("Restoring allStoredChunks.bak");
+		    fin = new FileInputStream(file);
+		    ObjectInputStream restore = new ObjectInputStream(fin);
+		    peer.backup.allStoredChunks = (ArrayList<Chunk>)restore.readObject();
+		    restore.close();
+		}
+		
+		file = new File("backedFiles.bak");    
+		if (file.exists()) {
+			System.out.println("Restoring backedFiles.bak");
+		    fin = new FileInputStream(file);
+		    ObjectInputStream restore = new ObjectInputStream(fin);
+		    peer.backup.backedFiles = (ConcurrentHashMap<String,String>)restore.readObject();
+		    restore.close();
+		}
+		
+		file = new File("totalChunks.bak");    
+		if (file.exists()) {
+			System.out.println("Restoring totalChunks.bak");
+		    fin = new FileInputStream(file);
+		    ObjectInputStream restore = new ObjectInputStream(fin);
+		    peer.backup.totalChunks = (ConcurrentHashMap<String,Integer>)restore.readObject();
+		    restore.close();
+		}
+		
+		
+	}
+	public static void printMap(ConcurrentHashMap<String,String> mp) {
+	    java.util.Iterator<Entry<String, String>> it = mp.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        System.out.println("FileName:"+pairs.getKey() + " | FileId: " + pairs.getValue());
+	        it.remove(); // avoids a ConcurrentModificationException
+	    }
 	}
 }

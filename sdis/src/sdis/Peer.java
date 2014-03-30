@@ -10,7 +10,8 @@ import java.util.Arrays;
 public class Peer {
 	private SubscribeChannel MC,MDB,MDR;
 	static Thread threadMC,threadMDB,threadMDR;
-	
+	public Backup backup;
+	public Restore restore;
 	
 	public Peer(String MCaddr, String MCport,String MDBaddr, String MDBport, String MDRaddr, String MDRport) throws NoSuchAlgorithmException, IOException, InterruptedException{
 
@@ -22,8 +23,8 @@ public class Peer {
 		threadMDB= new Thread(MDB);
 		threadMDR= new Thread(MDR);
 		
-		Backup backup = new Backup(MDB,MC,MDR);
-		Restore restore = new Restore(MDR,MC,backup);
+		backup = new Backup(MDB,MC,MDR);
+		restore = new Restore(MDR,MC,backup);
 		MC.setBackup(backup);
 		MDB.setBackup(backup);
 		MC.setRestore(restore);
@@ -42,7 +43,7 @@ public class Peer {
 			}
 			System.out.println("oi");
 		}*/
-		if(!backup.backFile("file.jpg",1))
+		/*if(!backup.backFile("file.jpg",2))
 			System.out.println("FAILED");
 		else{
 			System.out.println("BACKED");
@@ -54,7 +55,7 @@ public class Peer {
 				System.out.println("FAILED RESTORING");
 			else
 				System.out.println("RESTORED");
-		}
+		}*/
 		
 		//MDB.setBackup(backup);
 		//MDR.setBackup(backup);

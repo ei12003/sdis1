@@ -2,7 +2,10 @@ package sdis;
 
 //Import some needed classes
 import java.io.Console;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,8 +145,19 @@ public class SubscribeChannel implements Runnable {
 						System.out.println("Received PUTCHUNK from "
 								+ strAdress);
 						backup.saveChunk(msg);
-						
+						if(msg.getData().length<64000){
+							try {
+								FileOutputStream fout = new FileOutputStream("allStoredChunks.bak");
+								ObjectOutputStream oos;
+								oos = new ObjectOutputStream(fout);
+								   oos.writeObject(backup.allStoredChunks);
+							        oos.close();
 
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
 					}
 				}
 			});

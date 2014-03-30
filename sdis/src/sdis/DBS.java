@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 public class DBS {
 	private static SplitMessage m;
 	private static Menu menu;
-	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+	public static void main(String[] args) throws Exception {
 
 		/*if(args.length<6){ // 1.1.1.1 1111 1.1.1.1 1111 1.1.1.1 1111
 			System.out.println("java Peer <MC_ADDR> <MC_PORT> <MDB_ADDR> <MDB_PORT> <MDR_ADDR> <MDR_PORT>\n");

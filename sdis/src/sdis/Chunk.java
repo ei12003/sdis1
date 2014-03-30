@@ -1,11 +1,12 @@
 package sdis;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Chunk {
+public class Chunk implements Serializable{
 	public String fileId;
 	public int chunkNo;
 	public int replicationDeg;

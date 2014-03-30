@@ -2,10 +2,11 @@ package sdis;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Restore {
+public class Restore implements Serializable {
 	SubscribeChannel MDR, MC;
 	ConcurrentHashMap<Integer,Chunk> fileRestoring;
 	Backup backup;

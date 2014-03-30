@@ -5,7 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -13,7 +16,7 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Backup {
+public class Backup implements Serializable{
 	public static final int INIT_BACKUP_TIMEOUT = 500;
 	public static final int MAX_TRIES = 5;
 	ArrayList<Chunk> allBackedChunks, allStoredChunks;
@@ -68,8 +71,10 @@ public class Backup {
 			if (msg.getFileId().equals(allStoredChunks.get(i).fileId)
 					&& (msg.getChunkNo() == allStoredChunks.get(i).chunkNo)) {
 				
-				if(!allStoredChunks.get(i).exceedsReplication())
+				if(!allStoredChunks.get(i).exceedsReplication()){
 					MC.send(header.getBytes());
+			        
+				}
 				else{
 					System.out.println("REMOVING:"+allStoredChunks.size()+allStoredChunks.get(i).exceedsReplication());
 					allStoredChunks.remove(i);
@@ -96,25 +101,64 @@ public class Backup {
 	public boolean split(File file, int replicationDeg)
 			throws NoSuchAlgorithmException, IOException, InterruptedException {
 		int bytesRead, chunkNo = 0;
+		boolean go = true;
+		int bytesRead2 = 0;
 		String filename = file.getName();
 		String bitString = filename + file.lastModified();
 		String fileID = SHA256.apply(bitString);
-		BufferedInputStream fileBuffer = new BufferedInputStream(
+		BufferedInputStream fileBuffer = null;
+		if(file.exists())
+		fileBuffer = new BufferedInputStream(
 				new FileInputStream(file));
+		else{
+			System.out.println("File doesn't exist!");
+			return false;
+		}
+		
 		byte[] buffer = new byte[chuckSize];
 		byte[] newbuffer;
 		Chunk chunk;
 
 		while ((bytesRead = fileBuffer.read(buffer)) > 0) {
+			bytesRead2 = bytesRead;
+			go=true;
 			newbuffer = Arrays.copyOfRange(buffer, 0,bytesRead);
 			
 			chunk = new Chunk(fileID, chunkNo, replicationDeg);
-			if(!sendChunk(chunk, newbuffer, "MDB"))
+			if(!sendChunk(chunk, newbuffer, "MDB")){
+				fileBuffer.close();
 				return false;
+			}
 
-			allBackedChunks.add(chunk);
+			
+			for(int i=0;i<allBackedChunks.size();i++)
+				if(allBackedChunks.get(i).chunkNo==chunk.chunkNo && allBackedChunks.get(i).fileId.equals(chunk.fileId))
+					go=false;
+			
+			if(go)
+				allBackedChunks.add(chunk);
 			chunkNo++;
 			totalChunks.put(fileID, chunkNo);
+
+		}
+		if(bytesRead2==64000){
+			System.out.println("BYTESREAD2");
+			newbuffer = null;
+			
+			chunk = new Chunk(fileID, chunkNo, replicationDeg);
+			if(!sendChunk(chunk, newbuffer, "MDB")){
+				fileBuffer.close();
+				return false;
+			}
+			
+			for(int i=0;i<allBackedChunks.size();i++)
+				if(allBackedChunks.get(i).chunkNo==chunk.chunkNo && allBackedChunks.get(i).fileId.equals(chunk.fileId))
+					go=false;
+			if(go)
+				allBackedChunks.add(chunk);
+			chunkNo++;
+			totalChunks.put(fileID, chunkNo);
+
 		}
 		backedFiles.put(filename, fileID);
 		return true;
