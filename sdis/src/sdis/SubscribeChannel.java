@@ -122,7 +122,7 @@ public class SubscribeChannel implements Runnable {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						//ACTUALIZAR FICHEIRO BAKs
+						
 					}
 					else if (messageType.equals("GETCHUNK")) {
 						
@@ -138,7 +138,7 @@ public class SubscribeChannel implements Runnable {
 								
 								try {
 									System.out.println(allStoredChunks.get(i).data.length);
-									backup.sendChunk(allStoredChunks.get(i), allStoredChunks.get(i).data,"MDR");
+									backup.sendChunk(allStoredChunks.get(i), allStoredChunks.get(i).data,"MDR",false);
 								} catch (IOException | InterruptedException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
@@ -166,8 +166,13 @@ public class SubscribeChannel implements Runnable {
 						}
 					}
 					else if (messageType.equals("PUTCHUNK")) {
-						System.out.println("Received PUTCHUNK from "
-								+ strAdress);
+						
+						
+						
+						if(!backup.isFileBacked(msg.getFileId()) && !backup.isChunkRemoved(msg.getFileId())){
+						
+							System.out.println("Received PUTCHUNK from "
+									+ strAdress);
 						backup.saveChunk(msg);
 						if(msg.getData().length<64000){
 							try {
@@ -182,6 +187,7 @@ public class SubscribeChannel implements Runnable {
 								e.printStackTrace();
 							}
 						}
+					}
 					}
 				}
 			});

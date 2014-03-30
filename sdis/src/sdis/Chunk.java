@@ -37,7 +37,6 @@ public class Chunk implements Serializable{
 		}
 		if(go){
 			storedPeers.add(peer);
-			System.out.println("ADDING");
 		}
 	}
 	

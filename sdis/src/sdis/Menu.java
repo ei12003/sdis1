@@ -22,7 +22,7 @@ import javax.swing.text.html.HTMLDocument.Iterator;
 public class Menu {
 	private static SplitMessage m;
 	private Peer peer;
-	private int rep=1;
+	private int rep=2;
 	public Menu(){
 		
 	}

@@ -11,16 +11,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Backup implements Serializable{
 	public static final int INIT_BACKUP_TIMEOUT = 500;
 	public static final int MAX_TRIES = 5;
-	ArrayList<Chunk> allBackedChunks, allStoredChunks;
+	ArrayList<Chunk> allBackedChunks, allStoredChunks, removedChunks;
 	ConcurrentHashMap<String,String> backedFiles;
 	ConcurrentHashMap<String,Integer> totalChunks;
 	SubscribeChannel MDB, MC, MDR;
@@ -32,6 +35,7 @@ public class Backup implements Serializable{
 			throws NoSuchAlgorithmException, IOException {
 		allBackedChunks = new ArrayList<Chunk>();
 		allStoredChunks = new ArrayList<Chunk>();
+		removedChunks = new ArrayList<Chunk>();
 		backedFiles = new ConcurrentHashMap<String,String>();
 		totalChunks = new ConcurrentHashMap<String,Integer>();
 		this.MDB = MDB;
@@ -39,6 +43,7 @@ public class Backup implements Serializable{
 		this.MDR = MDR;
 	}
 
+	
 	public synchronized void saveChunk(Message msg) {
 		boolean go = true;
 		if (msg.getChunkNo() == 10)
@@ -92,7 +97,31 @@ public class Backup implements Serializable{
 		}
 
 	}
+	public boolean isFileBacked(String name){
+		
+		java.util.Iterator<Entry<String, String>> it = backedFiles.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        
+	        if(((String)pairs.getValue()).equals(name))
+	        	return true;
+	    }
+		return false;
+		
+	}
+	
+	public boolean isChunkRemoved(String id){
+		
+		for(int i=0;i<removedChunks.size();i++){
+			if(removedChunks.get(i).fileId.equals(id))
+				return true;
+		}
+		return false;
+		
+	}
+	
 
+	
 	public boolean backFile(String filename, int rep) throws NoSuchAlgorithmException, IOException, InterruptedException{
 		if(!split(new File(filename),rep))
 			return false;
@@ -126,7 +155,7 @@ public class Backup implements Serializable{
 			newbuffer = Arrays.copyOfRange(buffer, 0,bytesRead);
 			
 			chunk = new Chunk(fileID, chunkNo, replicationDeg);
-			if(!sendChunk(chunk, newbuffer, "MDB")){
+			if(!sendChunk(chunk, newbuffer, "MDB",false)){
 				fileBuffer.close();
 				return false;
 			}
@@ -147,7 +176,7 @@ public class Backup implements Serializable{
 			newbuffer = null;
 			
 			chunk = new Chunk(fileID, chunkNo, replicationDeg);
-			if(!sendChunk(chunk, newbuffer, "MDB")){
+			if(!sendChunk(chunk, newbuffer, "MDB",false)){
 				fileBuffer.close();
 				return false;
 			}
@@ -167,7 +196,7 @@ public class Backup implements Serializable{
 		return true;
 	}
 
-	public boolean sendChunk(Chunk chunk, byte[] data, String strChannel) throws IOException, InterruptedException {
+	public boolean sendChunk(Chunk chunk, byte[] data, String strChannel, boolean removedProtocol) throws IOException, InterruptedException {
 
 		int timeout = INIT_BACKUP_TIMEOUT;
 		int tries = 0;
@@ -177,14 +206,25 @@ public class Backup implements Serializable{
 		while (tries < MAX_TRIES) {
 			if(strChannel.equals("MDB")){
 				currentChunk = chunk;
+				
 				chunk.resetStoredPeers();
+				if(removedProtocol){
+					chunk.addStoredPeer(InetAddress.getLocalHost().getHostAddress().toString());
+					Thread.sleep(timeout);
+					timeout *= 2;	
+					if (chunk.isDesiredReplication())
+						break;
+				}
+					
 				//PUTCHUNK <Version> <FileId> <ChunkNo> <ReplicationDeg> <CRLF> <CRLF> <Body>
 				header = "PUTCHUNK" + " 1.0 " + chunk.fileId + " " + chunk.chunkNo + " "
 						+ chunk.replicationDeg + Message.CRLF + Message.CRLF;
 				sendChunkToChannel(MDB, data, header);
 				
+				if(!removedProtocol){
 				Thread.sleep(timeout);
 				timeout *= 2;	
+				}
 				
 				System.out.println("TIMED OUT MDB" + chunk.isDesiredReplication()
 						+ " # ChunkNo " + chunk.chunkNo + "# PeerStored "
@@ -290,7 +330,7 @@ public class Backup implements Serializable{
 			{
 				allStoredChunks.get(i).removePeer(peer);
 				if(!allStoredChunks.get(i).isDesiredReplication()){
-					if(!sendChunk(allStoredChunks.get(i), allStoredChunks.get(i).data, "MDB")){
+					if(!sendChunk(allStoredChunks.get(i), allStoredChunks.get(i).data, "MDB",true)){
 						System.out.println("Couldn't send file.");
 					return false;
 				}

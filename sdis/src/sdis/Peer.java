@@ -135,6 +135,7 @@ public class Peer {
 			MC.send(outputStream.toByteArray());
 			System.out.println("SENDING :"+header+"\n");
 			
+			backup.removedChunks.add(backup.allStoredChunks.get(0));
 			backup.allStoredChunks.remove(0);
 		}
 		System.out.println("Total space after: "+findTotalSpace());
