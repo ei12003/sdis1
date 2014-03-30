@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -160,7 +161,8 @@ public class Backup implements Serializable{
 			totalChunks.put(fileID, chunkNo);
 
 		}
-		System.out.println("BACCKIN");
+		
+		fileBuffer.close();
 		backedFiles.put(filename, fileID);
 		return true;
 	}
@@ -245,5 +247,38 @@ public class Backup implements Serializable{
 			}
 		}
 
+	}
+	
+	public void updateAllBackedChunksFile() throws IOException, ClassNotFoundException{
+		FileOutputStream fout = new FileOutputStream("allBackedChunks.bak");
+		ObjectOutputStream oos;
+		oos = new ObjectOutputStream(fout);
+		   oos.writeObject(allBackedChunks);
+	        oos.close();
+	}
+	public void updateAllStoredChunks() throws IOException, ClassNotFoundException{
+		FileOutputStream fout = new FileOutputStream("allStoredChunks.bak");
+		ObjectOutputStream oos;
+		oos = new ObjectOutputStream(fout);
+		   oos.writeObject(allStoredChunks);
+	        oos.close();
+		
+
+	}
+	public void updateBackedFilesFile() throws IOException, ClassNotFoundException{
+		FileOutputStream fout = new FileOutputStream("backedFiles.bak");
+		ObjectOutputStream oos;
+		oos = new ObjectOutputStream(fout);
+		   oos.writeObject(backedFiles);
+	        oos.close();
+	}
+	public void updateTotalChunksFile() throws IOException, ClassNotFoundException{
+	
+		
+		FileOutputStream fout = new FileOutputStream("totalChunks.bak");
+		ObjectOutputStream oos;
+		oos = new ObjectOutputStream(fout);
+		   oos.writeObject(totalChunks);
+	        oos.close();
 	}
 }

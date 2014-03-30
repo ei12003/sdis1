@@ -104,6 +104,26 @@ public class SubscribeChannel implements Runnable {
 						if(backup.currentChunk!=null)
 							backup.currentChunk.addStoredPeer(peer);
 					}
+					else if (messageType.equals("DELETE")) {
+						int removed;
+						do{
+							removed=0;
+						for(int i=0;i<backup.allStoredChunks.size();i++){
+							if(backup.allStoredChunks.get(i).fileId.equals(msg.getFileId())){
+								removed++;
+								backup.allStoredChunks.remove(i);
+							}
+						}
+						}while(removed>0);
+						
+						try {
+							backup.updateAllStoredChunks();
+						} catch (ClassNotFoundException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						//ACTUALIZAR FICHEIRO BAKs
+					}
 					else if (messageType.equals("GETCHUNK")) {
 						
 						ArrayList<Chunk>  allStoredChunks = backup.allStoredChunks;
@@ -127,9 +147,7 @@ public class SubscribeChannel implements Runnable {
 						}
 						
 					}
-					else if (messageType.equals("DELETE")) {
 
-					}
 					else if (messageType.equals("REMOVED")) {
 
 					}
@@ -167,6 +185,7 @@ public class SubscribeChannel implements Runnable {
 		}
 	}
 
+	
 	public void setBackup(Backup backup) {
 		this.backup = backup;
 

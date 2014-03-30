@@ -109,6 +109,10 @@ public class Menu {
 			      System.out.println("ChunkNo:"+peer.backup.allStoredChunks.get(i).chunkNo+" | FileID: "+peer.backup.allStoredChunks.get(i).fileId);
 								
 			}
+			else if(splits[0].equals("DELETE")/*bool*/){
+				if(!peer.deleteFile(splits[1]))
+					System.out.println("Delete Failed.");
+			}
 			else if(splits[0].equals("BACKUP")/*bool*/){
 				FileOutputStream fout;
 				 ObjectOutputStream oos;
@@ -158,9 +162,6 @@ public class Menu {
 				if(!peer.restore.restoreFile(splits[1]))
 					System.out.println("FAILED RESTORING");
 				peer.restore.restoringATM=false;
-
-			}
-			else if(splits[0].equals("DELETE")){
 
 			}
 			else if(splits[0].equals("REMOVE")){

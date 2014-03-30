@@ -14,11 +14,17 @@ public class Message {
 	private int replicationDeg;
 	private byte[] body;
 
-	public byte[] splitBody(byte[] data){
+	public byte[] splitBody(byte[] data,int part){
 		for(int i=0;i<data.length;i++){
 			if(data[i]==13 && data[i+1]==10 && data[i+2]==13 && data[i+3]==10){
+				if(part==1){
 				byte[] body = Arrays.copyOfRange(data, i+4, data.length);
 					return body;
+				}
+				else{
+					byte[] body = Arrays.copyOfRange(data, 0, i);
+					return body;
+				}
 			}
 			
 		}
@@ -33,7 +39,9 @@ public class Message {
 //if(messageType.equals("GETCHUNK"))
 	//System.out.println("hey");
 		if (messageType.equals("DELETE")) {
-			fileId = temp[1];
+			//fileId = temp[1];
+			fileId = new String(splitBody(temp[1].getBytes(),2));
+			
 		} else {
 			if (messageType.equals("PUTCHUNK")){
 				replicationDeg = Integer.parseInt(temp[4].split(CRLF+CRLF)[0]);
@@ -45,7 +53,7 @@ public class Message {
 			fileId = temp[2];
 
 			if (messageType.equals("PUTCHUNK") || messageType.equals("CHUNK")){
-				body=splitBody(messageBytes);
+				body=splitBody(messageBytes,1);
 				//System.out.println(body.length()+"$$$$$$$$$$$\n"+body+"\n$$$$$$$$$$");
 			}
 		}

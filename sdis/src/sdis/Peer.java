@@ -1,5 +1,6 @@
 package sdis;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -62,5 +63,48 @@ public class Peer {
 
 			 
 		
+	}
+
+	public boolean deleteFile(String string) throws Exception {
+		String fileId = backup.backedFiles.get(string);
+		if(fileId==null){
+			System.out.println("File doesn't exist.");
+			return false;
+		}			
+		String header = "DELETE " + fileId + Message.CRLF + Message.CRLF;
+		
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(header.getBytes());
+		MC.send(outputStream.toByteArray());
+		System.out.println("SENDING :"+header+"\n");
+		
+		
+		int removed;
+		do{
+			removed=0;
+		for(int i=0;i<backup.allBackedChunks.size();i++){
+			if(backup.allBackedChunks.get(i).fileId.equals(fileId)){
+				removed++;
+				backup.allBackedChunks.remove(i);
+			}
+		}
+		}while(removed>0);
+		backup.updateAllBackedChunksFile();
+		
+		
+		backup.backedFiles.remove(string);
+		backup.updateBackedFilesFile();
+		
+		backup.totalChunks.remove(string);
+		backup.updateTotalChunksFile();
+		
+		File f=new File(string);
+		if(f.delete())
+			return true;
+		else{
+			System.out.println("Can't Delete File");
+			return false;
+		}
+			
 	}
 }
