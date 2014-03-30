@@ -81,6 +81,7 @@ public class Menu {
 				System.out.println("RESTORE filename - restore a file by its a name");
 				
 				System.out.println("DELETE filename - sent a DELETE message for the file with name filename");
+				System.out.println("RECLAIM size - size in bytes");
 				System.out.println("");
 				
 				System.out.println("BACKUP filename - backup a file with name filename");
@@ -108,6 +109,10 @@ public class Menu {
 				for(int i=0;i<peer.backup.allStoredChunks.size();i++)
 			      System.out.println("ChunkNo:"+peer.backup.allStoredChunks.get(i).chunkNo+" | FileID: "+peer.backup.allStoredChunks.get(i).fileId);
 								
+			}
+			else if(splits[0].equals("RECLAIM")/*bool*/){
+				if(!peer.reclaim(Integer.parseInt(splits[1])))
+					System.out.println("Reclaim Failed.");
 			}
 			else if(splits[0].equals("DELETE")/*bool*/){
 				if(!peer.deleteFile(splits[1]))
@@ -164,9 +169,7 @@ public class Menu {
 				peer.restore.restoringATM=false;
 
 			}
-			else if(splits[0].equals("REMOVE")){
-
-			}
+			
 			else if(input.equals("q")||input.equals("Q")){
 				System.exit(0);
 			}

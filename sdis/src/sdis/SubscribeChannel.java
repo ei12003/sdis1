@@ -117,7 +117,7 @@ public class SubscribeChannel implements Runnable {
 						}while(removed>0);
 						
 						try {
-							backup.updateAllStoredChunks();
+							backup.updateAllStoredChunksFile();
 						} catch (ClassNotFoundException | IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -149,7 +149,13 @@ public class SubscribeChannel implements Runnable {
 					}
 
 					else if (messageType.equals("REMOVED")) {
-
+						try {
+							if(!backup.removedSent(msg,peer))
+								System.out.println("Couldn't removed as wished.");
+						} catch (IOException | InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					else if(messageType.equals("CHUNK")){
 						if(restore.restoringATM){

@@ -256,7 +256,7 @@ public class Backup implements Serializable{
 		   oos.writeObject(allBackedChunks);
 	        oos.close();
 	}
-	public void updateAllStoredChunks() throws IOException, ClassNotFoundException{
+	public void updateAllStoredChunksFile() throws IOException, ClassNotFoundException{
 		FileOutputStream fout = new FileOutputStream("allStoredChunks.bak");
 		ObjectOutputStream oos;
 		oos = new ObjectOutputStream(fout);
@@ -280,5 +280,28 @@ public class Backup implements Serializable{
 		oos = new ObjectOutputStream(fout);
 		   oos.writeObject(totalChunks);
 	        oos.close();
+	}
+
+	public boolean removedSent(Message msg, String peer) throws IOException, InterruptedException {
+
+		for(int i=0;i<allStoredChunks.size();i++){
+			if(allStoredChunks.get(i).fileId.equals(msg.getFileId())
+					&& allStoredChunks.get(i).chunkNo == msg.getChunkNo())
+			{
+				allStoredChunks.get(i).removePeer(peer);
+				if(!allStoredChunks.get(i).isDesiredReplication()){
+					if(!sendChunk(allStoredChunks.get(i), allStoredChunks.get(i).data, "MDB")){
+						System.out.println("Couldn't send file.");
+					return false;
+				}
+				}
+					
+				System.out.println("ChunkNo: "+msg.getChunkNo()+"removed");
+				return true;
+			}
+		}
+		
+		System.out.println("I don't have that chunk.");
+		return false;
 	}
 }

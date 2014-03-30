@@ -18,6 +18,7 @@ public class Chunk implements Serializable{
 		this.fileId=fileId;
 		this.chunkNo=chunkNo;
 		this.replicationDeg=replicationDeg;
+		chunkSize=0;
 
 		storedPeers = new ArrayList<String>();
 		try {
@@ -71,6 +72,14 @@ public class Chunk implements Serializable{
 	public void setData(byte[] data) {
 		this.data=data;
 		chunkSize=data.length;
+		
+	}
+
+	public void removePeer(String peer) {
+		for(int i=0;i<storedPeers.size();i++){
+			if(storedPeers.get(i).equals(peer))
+				storedPeers.remove(i);
+		}
 		
 	}
 }

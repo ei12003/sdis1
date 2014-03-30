@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.AllPermission;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
@@ -106,5 +107,43 @@ public class Peer {
 			return false;
 		}
 			
+	}
+
+
+	public int findTotalSpace(){
+		int size=0;
+		for(int i=0;i<backup.allStoredChunks.size();i++){
+			size+=backup.allStoredChunks.get(i).getSize();
+		}
+		return size;
+	}
+	public boolean reclaim(int numSize) throws IOException {
+		System.out.println("Total space before: "+findTotalSpace());
+		int size=0;
+		while(size<numSize){
+			if(backup.allStoredChunks.size()==0)
+			{
+				System.out.println("No more space available to free.");
+				return true;
+			}
+			size+=backup.allStoredChunks.get(0).getSize();
+			
+			String header = "REMOVED" + " 1.0 "+ backup.allStoredChunks.get(0).fileId + " " + backup.allStoredChunks.get(0).chunkNo + Message.CRLF + Message.CRLF;
+			
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			outputStream.write(header.getBytes());
+			MC.send(outputStream.toByteArray());
+			System.out.println("SENDING :"+header+"\n");
+			
+			backup.allStoredChunks.remove(0);
+		}
+		System.out.println("Total space after: "+findTotalSpace());
+		try {
+			backup.updateAllStoredChunksFile();
+		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
 	}
 }
